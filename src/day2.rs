@@ -19,28 +19,54 @@ fn main() {
             .collect_vec();
     }
 
-    let solver = |input: &[usize], regex: Regex| {
+    // regex-based solution, it works but its slow
+    #[allow(unused)]
+    let regex_solver = |input: &[usize], regex: Regex| {
         input
             .par_iter()
             .filter(|id| regex.is_match(&id.to_string()).unwrap())
             .sum::<usize>()
     };
 
-    // Part 1
+    // not regex-based solution, way faster
+    let solver = |input: &[usize], part: usize| {
+        input
+            .par_iter()
+            .filter(|id| {
+                let id_str = id.to_string();
+                let (len, bytes) = (id_str.len(), id_str.as_bytes());
+
+                match part {
+                    1 if (len % 2 == 0) => (len / 2)..(len / 2 + 1),
+                    2 => 1..len,
+                    _ => 0..0,
+                }
+                .any(|pattern_size| {
+                    pattern_size > 0
+                        && len % pattern_size == 0
+                        && bytes.chunks(pattern_size).all_equal()
+                })
+            })
+            .sum::<usize>()
+    };
+
+    // part 1
     {
         timer!("part 1");
         println!(
             "part 1 : {}",
-            solver(&input, Regex::new(r"^(\d+)\1$").unwrap())
+            // regex_solver(&input, Regex::new(r"^(\d+)\1$").unwrap())
+            solver(&input, 1)
         );
     }
 
-    // Part 2
+    // part 2
     {
         timer!("part 2");
         println!(
             "part 2 : {}",
-            solver(&input, Regex::new(r"^(\d+)\1+$").unwrap())
+            // regex_solver(&input, Regex::new(r"^(\d+)\1+$").unwrap())
+            solver(&input, 2)
         );
     }
 }

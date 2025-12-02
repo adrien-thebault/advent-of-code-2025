@@ -26,13 +26,13 @@ fn main() {
             .0
     };
 
-    // Part 1
+    // part 1
     {
         timer!("part 1");
         println!("part 1 : {}", solver(&input));
     }
 
-    // Part 2
+    // part 2
     {
         timer!("part 2");
         println!(
