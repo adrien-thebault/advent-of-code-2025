@@ -14,12 +14,17 @@ impl Timer {
 
 impl Drop for Timer {
     fn drop(&mut self) {
+        use colored::Colorize;
         let duration = self.start.elapsed();
         println!(
-            "{} : {}.{:0>3}ms",
-            self.name,
-            duration.as_millis(),
-            duration.subsec_millis()
+            "{}",
+            format!(
+                "{} : {}.{:0>3}ms",
+                self.name,
+                duration.as_millis(),
+                duration.subsec_millis()
+            )
+            .dimmed()
         );
     }
 }
