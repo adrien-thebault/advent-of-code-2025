@@ -40,7 +40,7 @@ fn main() {
             solver(
                 &input
                     .iter()
-                    .flat_map(|n| itertools::repeat_n(n.signum(), n.abs() as usize))
+                    .flat_map(|n| itertools::repeat_n(n.signum(), n.unsigned_abs() as usize))
                     .collect_vec()
             )
         );
