@@ -19,10 +19,9 @@ impl Drop for Timer {
         println!(
             "{}",
             format!(
-                "{} : {}.{:0>3}ms",
+                "{} : {}ms",
                 self.name,
-                duration.as_millis(),
-                duration.subsec_millis()
+                duration.as_micros() as f64 / 1_000f64
             )
             .dimmed()
         );

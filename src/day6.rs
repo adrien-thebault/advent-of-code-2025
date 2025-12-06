@@ -1,10 +1,9 @@
-use std::ops::{Add, Mul};
-
 use advent_of_code_2025::*;
 use itertools::Itertools;
+use std::ops::{Add, Mul};
 
 fn transpose<T: Clone>(input: Vec<Vec<T>>) -> Vec<Vec<T>> {
-    let mut transposed = vec![vec![]; input[0].len()];
+    let mut transposed = vec![Vec::with_capacity(input.len()); input[0].len()];
 
     input.into_iter().for_each(|row| {
         row.into_iter()
