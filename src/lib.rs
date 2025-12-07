@@ -31,6 +31,6 @@ impl Drop for Timer {
 #[macro_export]
 macro_rules! timer {
     ($name:expr) => {
-        let _timer = advent_of_code_2025::Timer::new($name);
+        let _timer = $crate::Timer::new($name);
     };
 }
