@@ -10,8 +10,8 @@ struct Box {
 }
 
 impl Box {
-    fn dist(&self, Box { x, y, z }: &Box) -> f64 {
-        (((self.x - x).pow(2) + (self.y - y).pow(2) + (self.z - z).pow(2)) as f64).sqrt()
+    fn dist(&self, Box { x, y, z }: &Box) -> isize {
+        (self.x - x).pow(2) + (self.y - y).pow(2) + (self.z - z).pow(2)
     }
 }
 
@@ -39,49 +39,51 @@ fn main() {
             .map(|(b1, b2)| (b1, b2, b1.dist(b2)))
             .collect::<Vec<_>>()
             .into_iter()
-            .sorted_by(|(_, _, d1), (_, _, d2)| d2.partial_cmp(d1).unwrap())
+            .sorted_by_key(|(_, _, d1)| -d1)
+            .map(|(b1, b2, _)| (b1, b2))
             .collect_vec();
     }
 
-    let solver =
-        |combinations: &mut Vec<(_, _, _)>, map: &mut HashMap<_, _>, sizes: &mut Vec<_>| {
-            combinations.pop().map(|(b1, b2, _)| {
-                match (map.get(b1).copied(), map.get(b2).copied()) {
-                    (Some(c1), Some(c2)) if c1 != c2 => {
-                        sizes[c1] += sizes[c2];
-                        sizes[c2] = 0;
-                        map.iter_mut()
-                            .filter(|(_, c)| **c == c2)
-                            .for_each(|(_, c)| *c = c1);
-                    }
-                    (None, Some(circuit)) | (Some(circuit), None) => {
-                        map.insert(b1, circuit);
-                        map.insert(b2, circuit);
-                        sizes[circuit] += 1;
-                    }
-                    (None, None) => {
-                        let circuit_id = sizes.len();
-                        map.insert(b1, circuit_id);
-                        map.insert(b2, circuit_id);
-                        sizes.push(2);
-                    }
-                    _ => {}
+    let solver = |combinations: &mut Vec<(_, _)>, map: &mut HashMap<_, _>, sizes: &mut Vec<_>| {
+        combinations.pop().map(|(b1, b2)| {
+            match (map.get(b1).copied(), map.get(b2).copied()) {
+                (Some(c1), Some(c2)) if c1 != c2 => {
+                    sizes[c1] += sizes[c2];
+                    sizes[c2] = 0;
+                    map.iter_mut()
+                        .filter(|(_, c)| **c == c2)
+                        .for_each(|(_, c)| *c = c1);
                 }
+                (None, Some(circuit)) | (Some(circuit), None) => {
+                    map.insert(b1, circuit);
+                    map.insert(b2, circuit);
+                    sizes[circuit] += 1;
+                }
+                (None, None) => {
+                    let circuit_id = sizes.len();
+                    map.insert(b1, circuit_id);
+                    map.insert(b2, circuit_id);
+                    sizes.push(2);
+                }
+                _ => {}
+            }
 
-                (b1, b2)
-            })
-        };
+            (b1, b2)
+        })
+    };
 
     // part 1
     {
         timer!("part 1");
         println!("part 1 : {}", {
-            let (mut sizes, mut map, mut combinations) =
-                (vec![], HashMap::new(), combinations.clone());
+            let (mut sizes, mut map, mut stack) =
+                (vec![], HashMap::new(), Vec::with_capacity(1000));
 
             (0..1000).for_each(|_| {
-                solver(&mut combinations, &mut map, &mut sizes);
+                stack.push(solver(&mut combinations, &mut map, &mut sizes).unwrap());
             });
+
+            combinations.extend(stack);
 
             sizes.sort();
             sizes[sizes.len() - 3..].iter().product::<usize>()
